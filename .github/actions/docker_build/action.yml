@@ -60,7 +60,7 @@ runs:
       id: cache-regclient-restore
       uses: actions/cache/restore@v4
       with:
-        path: $HOME/.regctl
+        path: $HOME/.regctl/
         key: ${{ runner.os }}-regclient
     - name: Install regctl
       if: steps.cache-regclient-restore.outputs.cache-hit != 'true'
@@ -69,7 +69,7 @@ runs:
       id: cache-regclient-save
       uses: actions/cache/save@v4
       with:
-        path: $HOME/.regctl
+        path: $HOME/.regctl/
         key: ${{ runner.os }}-regclient
 
     - name: DockerHub login
