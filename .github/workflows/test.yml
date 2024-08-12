@@ -35,13 +35,12 @@ jobs:
       run:
         shell: bash
     outputs:
-      run_tests: ${{ steps.changed_files.outputs.run_tests }}
-#      build: ${{ steps.changes.outputs.build }}
-      build: ${{ env.BUILD }}
+      run_tests: ${{ steps.changes.outputs.run_tests }}
+      build: ${{ steps.changes.outputs.build }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.7
-      - id: changed_files
+      - id: changes
         name: Check for file changes
         uses: dorny/paths-filter@0bc4621a3135347011ad047f9ecf449bf72ce2bd # v3.0.0
         with:
@@ -51,7 +50,7 @@ jobs:
       - name: info
         shell: bash
         run: |
-          force_build="${{ contains(github.event.head_commit.message, 'ci:build') || contains(github.event.head_commit.message, 'ci:release') }}"
+          force_build="${{ contains(github.event.head_commit.message, 'ci:build') || contains(github.event.head_commit.message, 'ci:release')}}"
           force_scan="${{ contains(github.event.head_commit.message, 'ci:scan') }}"
           force_test="${{ contains(github.event.head_commit.message, 'ci:test') }}"
           
@@ -62,7 +61,7 @@ jobs:
           elif [[ $force_scan == "true" ]]; then
             echo "::notice:: Forced trivy scan due to commit message"
           fi
-          if [[ $force_build == "true" || "${{steps.changed_files.outputs.build}}" == "true" ]]; then 
+          if [[ $force_build == "true" || "${{needs.changes.outputs.run_tests}}" == "true" ]]; then 
               echo "BUILD=true" >> $GITHUB_ENV
           fi
 
@@ -70,7 +69,10 @@ jobs:
     needs: [ changes ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: needs.changes.outputs.build == 'true' || contains(github.event.head_commit.message, 'ci:all')
+    if: (needs.changes.outputs.build == 'true' 
+        || contains(github.event.head_commit.message, 'ci:test') 
+        || contains(github.event.head_commit.message, 'ci:all') 
+        )
     defaults:
       run:
         shell: bash
@@ -136,11 +138,14 @@ jobs:
             --network host \
             -v $PWD:/code/app \
             -w /code/app \
-            -t ${{ vars.DOCKER_IMAGE }}:${{needs.build.outputs.version}} \
+            -t ${{needs.build.outputs.image}} \
             pytest tests -v --create-db --maxfail=10 --cov -n auto --cov-report xml:coverage.xml
           ls -al
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
+        env:
+          token: ${{ secrets.CODECOV_TOKEN }}
+        if: env.token != null
         with:
           env_vars: OS,PYTHON
           fail_ci_if_error: true
