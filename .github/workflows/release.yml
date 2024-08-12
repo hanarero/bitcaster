@@ -20,6 +20,7 @@ permissions:
 
 jobs:
   build:
+    name: Build Test Docker
     runs-on: ubuntu-latest
     timeout-minutes: 30
     defaults:
@@ -94,7 +95,7 @@ jobs:
           name: codecov-${{env.GITHUB_REF_NAME}}
 
   deployable:
-    name: "Release to Docker"
+    name: "Build and Release"
     needs: [ test ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
