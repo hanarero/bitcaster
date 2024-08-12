@@ -51,6 +51,8 @@ jobs:
     services:
       redis:
         image: redis
+        ports:
+          - 16379:6379
       db:
         image: postgres:14
         env:
@@ -58,7 +60,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_USERNAME: postgres
         ports:
-          - 5432:5432
+          - 15432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -72,15 +74,15 @@ jobs:
       - name: Run tests
         run: |
           docker run --rm \
-            -e DATABASE_URL=postgres://postgres:postgres@localhost:5432/country_workspace \
+            -e DATABASE_URL=postgres://postgres:postgres@localhost:15432/country_workspace \
             -e SECRET_KEY=secret_key \
-            -e CACHE_URL=redis://redis:6379/0 \
-            -e CELERY_BROKER_URL=redis://redis:6379/0 \
+            -e CACHE_URL=redis://redis:16379/0 \
+            -e CELERY_BROKER_URL=redis://redis:16379/0 \
             --network host \
             -v $PWD:/code/app \
             -w /code/app \
             -t ${{ vars.DOCKER_IMAGE }}:${{needs.build.outputs.version}} \
-            pytest tests -v --create-db -v --maxfail=10
+            pytest tests -v --create-db --maxfail=10 --cov -n auto --cov-report xml:coverage.xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
