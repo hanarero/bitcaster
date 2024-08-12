@@ -106,6 +106,7 @@ runs:
           type=ref,event=branch
           type=ref,event=pr,prefix=${{env.TAG_PREFIX}}pr
           type=semver,pattern={{version}}
+          type=semver,pattern={{raw}}
       env:
         DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
     - name: "Image Name"
