@@ -68,6 +68,7 @@ runs:
       with:
         install-dir: '/home/runner/.regctl/bin'
     - name: Cache regclient
+      if: steps.cache-regclient-restore.outputs.cache-hit != 'true'
       id: cache-regclient-save
       uses: actions/cache/save@v4
       with:
