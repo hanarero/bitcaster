@@ -61,18 +61,18 @@ runs:
       uses: actions/cache/restore@v4
       with:
         path: '/home/runner/.regctl'
-        key: ${{ runner.os }}-regclient
+        key: ${{ runner.os }}-${{ github.workflow_sha }}-regclient
     - name: Install regctl
       if: steps.cache-regclient-restore.outputs.cache-hit != 'true'
       uses: regclient/actions/regctl-installer@main
       with:
-        install-dir: '/home/runner/.regctl'
+        install-dir: '/home/runner/.regctl/bin'
     - name: Cache regclient
       id: cache-regclient-save
       uses: actions/cache/save@v4
       with:
         path: '/home/runner/.regctl'
-        key: ${{ runner.os }}-regclient
+        key: ${{ runner.os }}-${{ github.workflow_sha }}-regclient
 
     - name: DockerHub login
       uses: docker/login-action@v3
