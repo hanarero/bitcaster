@@ -35,12 +35,13 @@ jobs:
       run:
         shell: bash
     outputs:
-      run_tests: ${{ steps.changes.outputs.run_tests }}
-      build: ${{ steps.changes.outputs.build }}
+      run_tests: ${{ steps.changed_files.outputs.run_tests }}
+#      build: ${{ steps.changes.outputs.build }}
+      build: ${{ env.BUILD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.7
-      - id: changes
+      - id: changed_files
         name: Check for file changes
         uses: dorny/paths-filter@0bc4621a3135347011ad047f9ecf449bf72ce2bd # v3.0.0
         with:
@@ -61,7 +62,7 @@ jobs:
           elif [[ $force_scan == "true" ]]; then
             echo "::notice:: Forced trivy scan due to commit message"
           fi
-          if [[ $force_build == "true" || "${{steps.changes.outputs.build}}" == "true" ]]; then 
+          if [[ $force_build == "true" || "${{steps.changed_files.outputs.build}}" == "true" ]]; then 
               echo "BUILD=true" >> $GITHUB_ENV
           fi
 
@@ -69,7 +70,7 @@ jobs:
     needs: [ changes ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: env.BUILD == 'true' || contains(github.event.head_commit.message, 'ci:all')
+    if: needs.changes.outputs.build == 'true' || contains(github.event.head_commit.message, 'ci:all')
     defaults:
       run:
         shell: bash
