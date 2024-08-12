@@ -168,7 +168,7 @@ jobs:
       run:
         shell: bash
     outputs:
-      image: ${{ steps.build.outputs.image }}
+      image: ${{ vars.DOCKER_IMAGE }}:${{needs.build.outputs.version}}
       version: ${{ steps.build.outputs.version }}
       created: ${{ steps.build.outputs.created }}
     steps:
@@ -194,7 +194,7 @@ jobs:
   trivy:
     name: Check Image with Trivy
     runs-on: ubuntu-latest
-    needs: [ deployable ]
+    needs: [ build, deployable ]
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
@@ -209,7 +209,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{needs.deployable.outputs.image}}
+          image-ref: ${{ vars.DOCKER_IMAGE }}:${{needs.build.outputs.version}}
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
