@@ -2,7 +2,7 @@ name: Publish Release
 
 on:
   release:
-#    types: [published]
+    types: [published]
 
 
 concurrency:
@@ -79,7 +79,7 @@ jobs:
             --network host \
             -v $PWD:/code/app \
             -w /code/app \
-            -t ${{needs.build.outputs.image}} \
+            -t ${{ vars.DOCKER_IMAGE }}:${{needs.build.outputs.version}} \
             pytest tests -v --create-db -v --maxfail=10
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
