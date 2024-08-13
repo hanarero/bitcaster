@@ -1,0 +1,60 @@
+name: Promote Release
+on:
+  release:
+#  workflow_dispatch:
+#    inputs:
+#      version:
+#        description: Version to release (optional)
+#        required: false
+#      force:
+#        description: Force a release even when there are release-blockers (optional)
+#        required: false
+
+jobs:
+  promote:
+    name: "Promote Docker"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.7
+      - id: checksum
+        uses: ./.github/actions/checksum
+      - name: Install regctl
+  #      if: steps.cache-regclient-restore.outputs.cache-hit != 'true'
+        uses: regclient/actions/regctl-installer@main
+        with:
+          install-dir: '/home/runner/.regctl/bin'
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5.5.1
+        with:
+          images: ${{ inputs.image }}
+          flavor: |
+            prefix=${{env.TAG_PREFIX}}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr,prefix=${{env.TAG_PREFIX}}pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{raw}}
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+      - name: Dump env context
+        shell: bash
+        run: |
+          image_checksum=$(regctl image inspect \
+                            -p linux/amd64 \
+                            --format '{{index .Config.Labels "checksum"}}' \
+                            -v fatal \
+                            ${{ steps.image_name.outputs.name }} 2>/dev/null)
+
+          echo "    event_name ${{github.event_name }}"
+          echo "commit message ${{github.event.head_commit.message }}"
+          echo "        docker ${{ vars.DOCKER_IMAGE}}:${{ steps.meta.outputs.version }}"
+          echo "       version ${{ steps.meta.outputs.version }}"
+          echo " code checksum ${{ steps.checksum.outputs.checksum }}"
+          echo "image checksum ${image_checksum}"
+
+          regctl image inspect --format '{{index .Config.Labels "checksum"}}' \
+                        -p linux/amd64 \
+                        -v fatal \
+                        ${{ vars.DOCKER_IMAGE}}:${{ steps.meta.outputs.version }}
