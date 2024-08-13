@@ -137,14 +137,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           code_checksum: ${{ steps.checksum.outputs.checksum }}
-#          code_checksum: ${{ contains(github.event.head_commit.message, 'ci:build') && steps.checksum.outputs.checksum || '' }}
       - shell: bash
         run: |
           echo "${{ toJSON(steps.build.outputs) }}"
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
+          subject-name: ${{ env.REGISTRY }}/${{ vars.DOCKER_IMAGE }}:${{ steps.build.outputs.version }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
 
