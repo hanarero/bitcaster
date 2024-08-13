@@ -47,6 +47,7 @@ jobs:
           filters: .github/file-filters.yml
   trivy:
     name: Trivy
+    if: needs.changes.outputs.lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -69,7 +70,7 @@ jobs:
   bandit:
     needs: changes
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false && needs.changes.outputs.lint
+    if: needs.changes.outputs.lint
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
