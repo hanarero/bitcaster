@@ -45,7 +45,7 @@ jobs:
                             -p linux/amd64 \
                             --format '{{index .Config.Labels "checksum"}}' \
                             -v fatal \
-                            ${{ steps.image_name.outputs.name }} 2>/dev/null)
+                            ${{ vars.DOCKER_IMAGE}}:${{ steps.meta.outputs.version }} 2>/dev/null)
 
           echo "    event_name ${{github.event_name }}"
           echo "commit message ${{github.event.head_commit.message }}"
