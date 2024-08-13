@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   build:
-    name: Build Test Docker
+    name: Build Release Test Docker
     runs-on: ubuntu-latest
     timeout-minutes: 30
     defaults:
@@ -46,7 +46,7 @@ jobs:
           code_checksum: ${{ steps.checksum.outputs.checksum }}
 
   test:
-    name: Run Test Suite
+    name: Run Pre-Release Test
     needs: [ build ]
     runs-on: ubuntu-latest
     services:
@@ -98,7 +98,7 @@ jobs:
           name: codecov-${{env.GITHUB_REF_NAME}}
 
   deployable:
-    name: "Build and Release"
+    name: "Build Release Docker"
     needs: [ test ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -124,7 +124,8 @@ jobs:
           target: 'dist'
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          code_checksum: ${{ contains(github.event.head_commit.message, 'ci:build') && steps.checksum.outputs.checksum || '' }}
+          code_checksum: ${{ steps.checksum.outputs.checksum }}
+#          code_checksum: ${{ contains(github.event.head_commit.message, 'ci:build') && steps.checksum.outputs.checksum || '' }}
       - shell: bash
         run: |
           echo "${{ toJSON(steps.build.outputs) }}"
@@ -136,7 +137,7 @@ jobs:
           push-to-registry: true
 
   trivy:
-    name: Check Image with Trivy
+    name: Check Release with Trivy
     runs-on: ubuntu-latest
     needs: [ deployable ]
     permissions:
