@@ -1,4 +1,4 @@
-name: Branch Deleted
+name: Delete Outdated Docker Image
 on: delete
 jobs:
   delete_branch:
