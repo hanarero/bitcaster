@@ -86,6 +86,9 @@ jobs:
             pytest tests -v --create-db --maxfail=10 --cov -n auto --cov-report xml:coverage.xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
+        env:
+          token: ${{ secrets.CODECOV_TOKEN }}
+        if: env.token != null
         with:
           env_vars: OS,PYTHON
           fail_ci_if_error: true
