@@ -1,0 +1,55 @@
+name: "[DEBUG] Dump"
+
+on:
+  check_run:
+  create:
+  delete:
+  discussion:
+  discussion_comment:
+  fork:
+  issues:
+  issue_comment:
+  milestone:
+  pull_request:
+  pull_request_review_comment:
+  pull_request_review:
+  push:
+  release:
+  workflow_dispatch:
+
+
+jobs:
+  dump:
+    name: "[DEBUG] Docker Info"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install regctl
+  #      if: steps.cache-regclient-restore.outputs.cache-hit != 'true'
+        uses: regclient/actions/regctl-installer@main
+        with:
+          install-dir: '/home/runner/.regctl/bin'
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5.5.1
+        with:
+          images: ${{ inputs.image }}
+          flavor: |
+            prefix=${{env.TAG_PREFIX}}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr,prefix=${{env.TAG_PREFIX}}pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{raw}}
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+      - name: Dump env context
+        shell: bash
+        run: |
+          echo "    event_name ${{github.event_name }}"
+          echo "commit message ${{github.event.head_commit.message }}"
+          echo "        docker ${{ vars.DOCKER_IMAGE}}:${{ steps.meta.outputs.version }}"
+          echo "       version ${{ steps.meta.outputs.version }}"
+          regctl image inspect --format '{{index .Config.Labels "checksum"}}' \
+                        -p linux/amd64 \
+                        -v fatal \
+                        ${{ vars.DOCKER_IMAGE}}:${{ steps.meta.outputs.version }}

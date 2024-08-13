@@ -128,13 +128,13 @@ runs:
                           ${{ steps.image_name.outputs.name }} 2>/dev/null)
         code_checksum="${{ inputs.code_checksum }}"
         if [[ "${{ contains(github.event.head_commit.message, 'ci:all') }}" == "true" ]];then
-          echo "::warning::🤔 Forced rebuild"
+          echo "::warning::🤔 Forced rebuild. Checksum found is '${image_checksum}'"
           echo "updated=false" >> $GITHUB_OUTPUT        
         elif [[ -z "$image_checksum"  ]]; then
           echo "::warning::🤔 No image checksum found"
           echo "updated=false" >> $GITHUB_OUTPUT
         elif [[ $image_checksum == $code_checksum ]]; then
-          echo "::notice::😀 Image is updated"
+          echo "::notice::😀 Image is updated. Checksum is '${image_checksum}'"
           echo "updated=true" >> $GITHUB_OUTPUT
         else
           echo "::warning::🤬 Checksum: found '${image_checksum}' expected '${code_checksum}'"
