@@ -49,6 +49,7 @@ jobs:
     name: Trivy
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Run Trivy vulnerability scanner in fs mode
         uses: aquasecurity/trivy-action@master
         with:
