@@ -35,6 +35,7 @@ jobs:
     name: Build Release Test Docker
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    needs: [ check ]
     defaults:
       run:
         shell: bash
