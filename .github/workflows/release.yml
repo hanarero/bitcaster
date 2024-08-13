@@ -19,6 +19,18 @@ permissions:
 
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - id: killswitch
+        name: Check release blockers
+        shell: bash
+        run: |
+          if [[ -z '${{ inputs.force }}' ]] && gh issue list -l release-blocker -s open | grep -q '^[0-9]\+[[:space:]]'; then
+            echo "Open release-blocking issues found, cancelling release...";
+            gh api -X POST repos/:owner/:repo/actions/runs/$GITHUB_RUN_ID/cancel;
+          fi
+
   build:
     name: Build Release Test Docker
     runs-on: ubuntu-latest
