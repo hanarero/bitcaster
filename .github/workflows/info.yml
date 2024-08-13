@@ -45,10 +45,11 @@ jobs:
       - name: Dump env context
         shell: bash
         run: |
-          echo "    event_name ${{github.event_name }}"
-          echo "commit message ${{github.event.head_commit.message }}"
-          echo "        docker ${{ vars.DOCKER_IMAGE}}:${{ steps.meta.outputs.version }}"
-          echo "       version ${{ steps.meta.outputs.version }}"
+          echo "    event_name:  ${{github.event_name }}"
+          echo "commit message:  ${{github.event.head_commit.message }}"
+          echo "        docker:  ${{ vars.DOCKER_IMAGE}}:${{ steps.meta.outputs.version }}"
+          echo "       version:  ${{ steps.meta.outputs.version }}"          
+          echo "======================================================="
           regctl image inspect --format '{{index .Config.Labels "checksum"}}' \
                         -p linux/amd64 \
                         -v fatal \
