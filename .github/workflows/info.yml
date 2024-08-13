@@ -1,4 +1,4 @@
-name: "[DEBUG] Dump"
+name: "[DEBUG] Info"
 
 on:
   check_run:
