@@ -1,7 +1,7 @@
 name: Branch Deleted
 on: delete
 jobs:
-  delete:
+  delete_branch:
     if: github.event.ref_type == 'branch'
     runs-on: ubuntu-latest
     steps:
@@ -19,8 +19,10 @@ jobs:
         run: |
           ref="${{github.event.ref}}"
           tag=$(echo $ref | sed -e "s#refs/heads/##g" | sed -e s#/#-##g)
-          name="${{vars.DOCKER_IMAGE}}:test-${{github.event.ref}}"          
-          echo "Delete $name" 
+          name1="${{vars.DOCKER_IMAGE}}:test-${tag}"          
+          name2="${{vars.DOCKER_IMAGE}}:${tag}"          
+          echo "Delete $name1" 
+          echo "Delete $name2"
 #      - name: Delete Test Docker Image
 #        shell: bash
 #        run: |
@@ -49,3 +51,25 @@ jobs:
 #              | awk '$1 == "Docker-Content-Digest:" { print $2 }' \
 #              | tr -d $'\r' \
 #          )"
+  delete_tag:
+    if: github.event.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    steps:
+#      - name: Install regctl
+#        uses: regclient/actions/regctl-installer@main
+#        with:
+#          install-dir: '/home/runner/.regctl'
+#      - name: regctl login
+#        uses: regclient/actions/regctl-login@main
+#        with:
+#          registry: docker.io
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - shell: bash
+        run: |
+          ref="${{github.event.ref}}"
+          tag=$(echo $ref | sed -e "s#refs/heads/##g" | sed -e s#/#-##g)
+          name1="${{vars.DOCKER_IMAGE}}:${tag}"          
+          name2="${{vars.DOCKER_IMAGE}}:test-${tag}"          
+          echo "Delete $name1" 
+          echo "Delete $name2"
